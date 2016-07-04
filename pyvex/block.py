@@ -72,6 +72,12 @@ class IRSB(VEXObject):
             if c_irsb == ffi.NULL:
                 raise PyVEXError(ffi.string(pvc.last_error) if pvc.last_error != ffi.NULL else "unknown error")
 
+            if ints_to_enums[c_irsb.jumpkind] == 'Ijk_NoDecode':
+                errmsg = "didn't decode"
+                if 'MIPS' in arch.name and num_inst == 1:
+                    errmsg += "; are you trying to single-step a jump or branch without its delay slot?"
+                raise PyVEXError(errmsg)
+
             # We must use a pickle value, CData objects are not pickeable so not ffi.NULL
             arch.vex_archinfo['hwcache_info']['caches'] = None
 
